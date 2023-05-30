@@ -48,20 +48,47 @@ services:
     networks:
       - SOC_NET
     
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
-    restart: unless-stopped
-    mem_limit: 512m
-    ports:
-      - "0.0.0.0:9200:9200"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - cluster.name=hive
-      - http.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+  Elasticsearch:
+    image: elasticsearch:7.17.4
+    container_name: elasticsearch
+    restart: always
     volumes:
-      - elasticsearchdata:/usr/share/elasticsearch/data
+    - elastic_data:/usr/share/elasticsearch/data/
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      discovery.type: single-node    
+    ports:
+    - '9200:9200'
+    - '9300:9300'
+    networks:
+      - SOC_NET
+
+  Logstash:
+    image: logstash:7.17.4
+    container_name: logstash
+    restart: always
+    volumes:
+    - ./logstash/:/logstash_dir
+    command: logstash -f /logstash_dir/logstash.conf 
+    depends_on:
+      - Elasticsearch
+    ports:
+    - '9600:9600'
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"    
+    networks:
+      - SOC_NET
+
+  Kibana:
+    image: kibana:7.17.4
+    container_name: kibana
+    restart: always       
+    ports:
+    - '5601:5601'
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200  
+    depends_on:
+      - Elasticsearch  
     networks:
       - SOC_NET
 
@@ -128,7 +155,7 @@ services:
       - "INIT=true"         
       - "CRON_USER_ID=1"   
       - "REDIS_FQDN=redis"
-      - "HOSTNAME=https://10.200.200.253"
+      - "HOSTNAME=https://137.184.129.229"
     networks:
       - SOC_NET
 
@@ -162,9 +189,9 @@ services:
 volumes:
   miniodata:
   cassandradata:
-  elasticsearchdata:
   thehivedata:
   mispsqldata:
+  elastic_data: {}
 
 networks:
     SOC_NET:
