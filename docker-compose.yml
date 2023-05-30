@@ -29,10 +29,6 @@ services:
       - "--s3-secret-key"
       - "minioadmin"
       - "--s3-use-path-access-style"
-      #- "--cortex-port"
-      #- "9001"
-      #- "--cortex-keys"
-      #- "abc"
     #If you are familiar with the previous docker compose file you will note that the Cortex ports and keys have been omitted this is because we can now
     #complete the integration from TheHive GUI directly.
     volumes:
