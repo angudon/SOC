@@ -29,7 +29,7 @@ services:
       - "--s3-secret-key"
       - "minioadmin"
       - "--s3-use-path-access-style"
-	  #- "--cortex-port"
+      #- "--cortex-port"
       #- "9001"
       #- "--cortex-keys"
       #- "abc"
